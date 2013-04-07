@@ -49,9 +49,7 @@ except:
 #   probes
 #   
 
-
 # AP
-
 # 
 
 def parse_airodump(line):
@@ -144,7 +142,7 @@ while last_line != '':
     # do some noise reduction
 
     update_db(sample)
-    
+
     last_line = sys.stdin.readline()
 
     

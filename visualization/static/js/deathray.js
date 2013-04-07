@@ -112,7 +112,7 @@ $(function() {
     }
 
     function x_y_from_angel(angle, power) {
-        var x = parseInt((46 * (power/10)) * Math.cos(angle / 60)); 
+        var x = parseInt((46 * (power/10)) * Math.cos(angle / 60));
         var y = parseInt((46 *  (power/10)) * Math.sin(angle / 60)*-1);
         return { 'x':x, 'y':y }
     }
