@@ -1,4 +1,3 @@
-#!/usr/bin/python2.7
 """
 Copyright (c) 2013 Anders Sundman <anders@4zm.org>
 
@@ -21,18 +20,28 @@ along with Datasamalen.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 
 import pymongo
-from datetime import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 import re
-
+import numpy
 import serial
 
 # Open the serial port (angle data from arduino) if available
-try:
-    s = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-except:
-    s = None
-    print('No serial interface found - running without angle info')
+def init_serial(tty = '/dev/ttyUSB0'):
+    """ Initialize the serial comunication object """
+
+    try:
+        s = serial.Serial(tty, 9600, timeout=1)
+        return s
+    except:
+        s = None
+        print('No serial interface found - running without angle info')
+
+    return s
+
+def init_db(host = 'localhost', port = 27017):
+    mongo_client = MongoClient(host, port)
+    return mongo_client.deathray
     
 # Client observation
 #   mac
@@ -80,7 +89,7 @@ def parse_client(line):
     client['type'] = 'client'
     client['mac'] = mac
     client['power'] = pwr if pwr < -1 and pwr > -127 else None 
-    client['probes'] = [s.strip() for s in probes.split(',')]
+    client['probes'] = [s.strip() for s in probes.split(',') if s != '']
     return client
     
 def parse_ap(line):
@@ -89,27 +98,28 @@ def parse_ap(line):
     ap['type'] = 'ap'
     return ap
     
-def add_angle_info(sample):
+def add_angle_info(sport, sample):
     """ If available, add angular data to data point """
 
-    angle_reading = s.readline() if s else None
+    angle_reading = sport.readline() if sport else None
     
     sample['angle'] = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
 
-def update_db(sample):
+def update_db(db, sample):
     """ Add the sample to the db, or update the data allready there """  
 
     if sample['type'] != 'client':
         return
     
-    # Register the observation
-    client_observations = db.client_observations
-    client_observations.insert({
-            'mac': sample['mac'],
-            'time': datetime.utcnow(),
-            'power': sample['power'],
-            'angle': sample['angle'],
-            })
+    # Register the observation (if it includes power info)
+    if sample['power']:
+        client_observations = db.client_observations
+        client_observations.insert({
+                'mac': sample['mac'],
+                'time': datetime.utcnow(),
+                'power': sample['power'],
+                'angle': sample['angle'],
+                })
 
 
     # Get the clients collection
@@ -131,18 +141,107 @@ def update_db(sample):
         clients.save(client)
 
 
-mongo_client = MongoClient('localhost', 27017)
-db = mongo_client.deathray
+def run_capture(db, sport, infile = None):
+    if not infile:
+        infile = sys.stdin
+
+    last_line = infile.readline()
+    while last_line != '':
+        sample = parse_airodump(last_line)
+        add_angle_info(sport, sample)
+
+        # do some noise reduction
+
+        update_db(db, sample)
     
-last_line = sys.stdin.readline()
-while last_line != '':
-    sample = parse_airodump(last_line)
-    add_angle_info(sample)
+        last_line = infile.readline()
 
-    # do some noise reduction
+def get_last_observation(db, mac, time_sec):
+    """
+    Process all observations of client with the specified mac during the
+    last time_sec seconds to find the max power and the angle.
+    """
 
-    update_db(sample)
+    # First, querry db for the latest observations
+    obs = db.client_observations
+    delta = timedelta(0, time_sec, 0)
+    now = datetime.utcnow()
+    last_obs = list(obs.find({'mac': mac,
+                              'time': {'$gt': now - delta}}))
+    if len(last_obs) < 1:
+        return None, None
 
-    last_line = sys.stdin.readline()
+    powers = [o['power'] for o in last_obs]
+    angles = [o['angle'] for o in last_obs]
 
-    
+    #print("raw pow: " + str(powers))
+    #print("raw ang: " + str(angles))
+
+    # Filter the power vector to reduce noise
+    powers = [int(x) for x in pwr_filter(powers)]
+
+    #print("flt pow: " + str(powers))
+
+    peak_power = max(powers)
+
+    # All observations must contain angle data, or none
+    if None in angles:
+        return peak_power, None
+
+    # Find the angle with the most power
+    peak_angle = center_of_gravity(powers, angles)
+
+    return peak_power, peak_angle
+
+
+def remove_all_observations(db):
+    db.client_observations.remove({})
+
+def pwr_filter(l):
+
+    if not l or len(l) < 1:
+        return None
+
+    kernel = [2, 6, 2]
+
+    # Normalize kernel
+    ks = sum(kernel)
+    kernel = [float(v) / ks for v in kernel]
+
+    # Pad data by extrapolating last value
+    hkl = len(kernel) // 2
+    ext_list = l[:hkl] + l + l[-hkl:]
+
+    # Do the convolution
+    return list(numpy.convolve(ext_list, kernel, 'valid'))
+
+def center_of_gravity(w, a = None):
+    """
+    Comute weighted center of gravity
+    w : weights, i.e. the power
+    a : angle data associated with the power data points
+    """
+
+    if not w or len(w) < 1:
+        return None
+
+    # If no angle is specified, use w indexes as angles
+    if not a:
+        a = list(xrange(len(w)))
+    elif len(w) != len(a):
+        print("ERROR: weight and angle lists must be of equal length")
+        return None
+
+    # Improve numerical stability by translating the data to the center
+    mid = sum(a) / len(a)
+
+    # Compute center of gravity
+    cog = sum([(a[i] - mid) * float(x) for i, x in enumerate(w)]) / sum(w) + mid
+
+    return cog
+
+if __name__ == '__main__':
+    sport = init_serial()
+    db = init_db()
+    run_capture(db, sport, sys.stdin)
+
