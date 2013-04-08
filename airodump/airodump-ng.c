@@ -2845,8 +2845,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 
     nlines = 2;
 
+#ifdef LIMIT_OUTPUT
     if( nlines >= ws_row )
         return;
+#endif
 
     if(G.do_sort_always) {
 	pthread_mutex_lock( &(G.mx_sort) );
@@ -2957,8 +2959,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 
     nlines += 3;
 
+#ifdef LIMIT_OUTPUT
     if( nlines >= ws_row )
         return;
+#endif
 
     memset( strbuf, ' ', ws_col - 1 );
     strbuf[ws_col - 1] = '\0';
@@ -3006,9 +3010,13 @@ void dump_print( int ws_row, int ws_col, int if_num )
 	num_ap = 0;
 
 	if(G.selection_ap) {
+#ifdef LIMIT_OUTPUT
 	    G.start_print_ap = G.selected_ap - ((ws_row-1) - nlines) + 1;
 	    if(G.start_print_ap < 1)
 		G.start_print_ap = 1;
+#else
+            G.start_print_ap = 1;
+#endif
     //	printf("%i\n", G.start_print_ap);
 	}
 
@@ -3040,8 +3048,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 
 	    nlines++;
 
+#ifdef LIMIT_OUTPUT
 	    if( nlines > (ws_row-1) )
 		return;
+#endif
 
 	    memset(strbuf, '\0', sizeof(strbuf));
 
@@ -3187,8 +3197,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 
 	nlines += 3;
 
+#ifdef LIMIT_OUTPUT
 	if( nlines >= (ws_row-1) )
 	    return;
+#endif
 
 	memset( strbuf, ' ', ws_col - 1 );
 	strbuf[ws_col - 1] = '\0';
@@ -3224,8 +3236,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 		continue;
 	    }
 
+#ifdef LIMIT_OUTPUT
 	    if( nlines >= (ws_row-1) )
 		return;
+#endif
 
 	    st_cur = G.st_end;
 
@@ -3259,8 +3273,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 
 		nlines++;
 
+#ifdef LIMIT_OUTPUT
 		if( ws_row != 0 && nlines >= ws_row )
 		    return;
+#endif
 
 		if( ! memcmp( ap_cur->bssid, BROADCAST, 6 ) )
 		    fprintf( stderr, " (not associated) " );
@@ -3328,8 +3344,10 @@ void dump_print( int ws_row, int ws_col, int if_num )
 
         nlines += 3;
 
+#ifdef LIMIT_OUTPUT
         if( nlines >= (ws_row-1) )
             return;
+#endif
 
         memset( strbuf, ' ', ws_col - 1 );
         strbuf[ws_col - 1] = '\0';
@@ -3354,13 +3372,17 @@ void dump_print( int ws_row, int ws_col, int if_num )
                 continue;
             }
 
+#ifdef LIMIT_OUTPUT
             if( nlines >= (ws_row-1) )
                 return;
+#endif
 
             nlines++;
 
+#ifdef LIMIT_OUTPUT
             if( ws_row != 0 && nlines >= ws_row )
                 return;
+#endif
 
             fprintf( stderr, " %02X:%02X:%02X:%02X:%02X:%02X",
                     na_cur->namac[0], na_cur->namac[1],
