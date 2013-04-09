@@ -120,6 +120,14 @@ ul li {
   height: 490px;
   background-color: #22ff00;
   transform-origin: 0px 0px;
+  -ms-transform-origin: 0px 0px;
+  /* IE 9 */
+  -webkit-transform-origin: 0px 0px;
+  /* Safari and Chrome */
+  -moz-transform-origin: 0px 0px;
+  /* Firefox */
+  -o-transform-origin: 0px 0px;
+  /* Opera */
   z-index: 1000; }
 
 aside .all_data, aside .data, aside .data_2_title, aside .data_2, aside .data_3, aside .console_back, aside .console {

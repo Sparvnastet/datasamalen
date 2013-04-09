@@ -18,7 +18,8 @@ def generate_num(length):
     number = random.randrange(0, length, 2)
     return number
 
+"""
 def mock_one_data():
-    devices_data = {'mac':generate_id(), 'power':generate_num(100),'angel':generate_num(360), 'bssid':generate_id(), 'packets':generate_num(9999)}
+    devices_data = {'mac':generate_id(), 'power':generate_num(100),'angle':generate_num(360), 'packets':generate_num(9999)}
     return devices_data
-
+"""

@@ -4,6 +4,8 @@ from visualization.models import Device
 from visualization.mock_data import *
 from fabric.api import local
 from datetime import datetime
+import sys
+import fileinput
 
 devices = Blueprint('devices', __name__, template_folder='templates')
 
@@ -18,8 +20,9 @@ def api_root():
         devices_data = {}
         for d in devices:
             id = str(d.id)
+            time = d.time.strftime('%H:%M')
 
-            devices_data[d.mac] = {'power':d.power,'angel':d.angel,'bssid':d.bssid, 'id':id}
+            devices_data[d.mac] = {'time':time, 'power':d.power, 'mac':d.mac, 'id':id}
 
         resp = jsonify(devices_data)
         resp.status_code = 200
@@ -32,15 +35,18 @@ def muck():
     device_data = create_device()
     resp = jsonify(device_data)
     resp.status_code = 200
-    print "muck"
-
     return resp
 
-@app.route('/disassociate/<device>', methods = ['GET'])
+@app.route('/ath0/<device>', methods = ['GET'])
 def disassociate(device):
     ## TODO make disassociation logic
     message = {}
-    message[device] = 'disassociated'
+    message[device] = 'ath0'
+    try:
+        local("sudo airodump-ng -c 6 --bssid %s -w out ath0 " % device)
+    except:
+        message[device] = 'ath0 failed'
+
     resp = jsonify(message)
     resp.status_code = 200
 
@@ -52,6 +58,10 @@ def command(command):
     print t
     if command == '--help':
         return '%s Commands: 1:[restart wlan] 2:[start mon] [stop mon] 3:[start dump] [stop dump]' %  str(t)
+    elif command == 'getwlan':
+        feedback = 'f'
+        feedback = get_wlan()
+        return '%s for now' % str(t)
     elif command == 'restart wlan':
         restart_wlan()
         return '%s wlan restarted' % str(t)
@@ -75,6 +85,19 @@ def command(command):
         return '%s dumping data into database' % str(t)
     else:
         return '%s --help' % str(t)
+
+
+# get current wlan interfaces running
+def get_wlan():
+    try:
+        wlan = local("ifconfig | grep wlan", capture=True)
+    except:
+        return "fail to retrive wlan status"
+    return "ok"
+
+def start_monitor():
+    local("sudo airmon-ng start wlan1")
+    return "running air-mon"
 
 
 def restart_wlan():
@@ -127,14 +150,13 @@ def create_device():
     device = Device(
         mac=generate_id(),
         power=str(generate_num(100)),
-        angel=str(generate_num(360)),
-        bssid=generate_id(),
+        angle=str(generate_num(360)),
         time= datetime.utcnow(),
-        packets=str(generate_num(9999))
+        probs=['katten', 'huset']
     )
     device.save()
     device_data = {}
     time = device.time.strftime('%H:%M')
-    device_data[device.mac] = {'power':device.power, 'time':time,'angel':device.angel,'bssid':device.bssid}
+    device_data[device.mac] = {'power':device.power, 'time':time, 'angle':device.angle, 'mac': device.mac, 'probes':device.probs}
 
     return device_data

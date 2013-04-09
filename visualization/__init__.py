@@ -2,7 +2,7 @@ from flask import Flask
 from flask.ext.mongoengine import MongoEngine
 
 app = Flask(__name__)
-app.config["MONGODB_SETTINGS"] = {'DB': "datasamalen"}
+app.config["MONGODB_SETTINGS"] = {'DB': "temp"}
 app.config["SECRET_KEY"] = "KeepThisS3cr3t"
 app.debug = True
 

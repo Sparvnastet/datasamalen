@@ -1,123 +1,112 @@
 
 $(function() {
 
-    var rotation = 0,
-        show_data_list = 1,
-        print_time = 1,
-        devices_listed = 0,
+    var show_data_list = 1,
         first = 1,
-        regular = 0,
-        times;
-
-
+        call_database = 1;
 
     updateContent();
 
     function updateContent() {
-
+        // make json request to api /json
         $.ajax({
             url:"json",
             beforeSend: function ( xhr ) {
-
             }
             }).done(function ( data ) {
-                console.log(data)
                 rotate();
-                $.each(data, function(id, group) {
+                $.each(data, function(id, device) {
 
-                    var _id = group.id,
-                    angel = group.angel,
-                    bssid = group.bssid,
-                    power = group.power,
-                    local_id = bssid.toString().replace(/\:/g, '');
+                    var _id = device.id,
+                    angle = device.angle,
+                    mac = device.mac,
+                    power = device.power,
 
+                    // create a local id for local storage
+                    local_id = mac.toString().replace(/\:/g, '');
+
+                    // if angel not defined, give angle a random number form 0 - 360
+                    if (!angle) {
+                        var angle = Math.floor((Math.random()*360)+1);
+                    }
+
+                    // on start up clear local storage
                     if(first == 1) {
                         localStorage.clear();
                         first = 0;
                     }
-
-                    store_device(_id, angel, bssid, power, local_id);
+                    // store or update the device to local storage
+                    store_device(local_id, angle, mac, power);
 
                 });
 
+            // call this function after 10 sec if database call is on.
+            if ( call_database == 1 ) {
             setTimeout (function () {
                 updateContent();
             }, 10000);
-
+            }
         });
     }
 
 
-    function store_device(_id, angle, bssid, power, local_id) {
-        device = localStorage.getItem(local_id);
+    function store_device(local_id, angle, bssid, power) {
+        var device = localStorage.getItem(local_id);
         if (device) {
-
+            var json_d = $.parseJSON(device);
+            // remove current circle if values has changed and update values
+            if ( json_d['power'] != power ) { // add this when angel is more stable "json_d['angle'] != angle ||"
+                var el = $("#visual_"+local_id);
+                $(el).remove();
+                set_device(local_id, angle, bssid, power)
+            }
         } else {
-            localStorage.setItem(local_id,
-            '{"id":"'+_id+'", ' +
-                '"mac" :"'+bssid+'", ' +
-                '"angle" :"'+angle+'", '+
-                '"power" :"'+power+'"}');
-
-        $(".data_2 ul").prepend('<li id="'+local_id+'">' +
-            '[ '+bssid+
-            ' ] '+power+
-            '</li>');
-        var x_y =  x_y_from_angel(angle, power);
-        list_device(_id, x_y, bssid, angle, power);
-
+            // if it's a new device store it in local storage
+            set_device(local_id, angle, bssid, power)
         }
     }
 
-    function list_device(id, x_y, bssid, angle, power) {
-        $(".data ul").append('<li id="'+id+'" ' +
+    // if it's a new device or if you update the values in local storage
+    function set_device(local_id, angle, bssid, power) {
+        localStorage.setItem(local_id,
+        '{"id":"'+local_id+'", ' +
+            '"mac" :"'+bssid+'", ' +
+            '"angle" :"'+angle+'", '+
+            '"power" :"'+power+'"}');
+        // also list and show device
+        // prepend it to the device list
+        list_device(local_id, bssid, angle, power)
+        // show it in the visualization
+        indicator(power, local_id, angle);
+    }
+
+    // list device in in device list and make a hidden li to be show on click of circle
+    function list_device(local_id,  bssid, angle, power) {
+        $(".data ul").append('<li id="detail_'+local_id+'" ' +
             'class="device_info">' +
             'Bssid: '+bssid+'<br/>' +
             'Power: '+power+' | ' +
             'Angel: ' +angle+'<br/><br/>' +
-            '<button>nmap</button>' +
-            '<button>disassociate</button>'+
-            '<button>upsidedownternet</button><br/>' +
+            '<button id="'+local_id+'" name="'+bssid+'" class="ath0">ath0</button>'+
             '</li>');
 
-        indicator(x_y, power, id, angle);
+        $(".data_2 ul").prepend('<li class="listing" id="list_'+local_id+'">' +
+            '[ '+bssid+
+            ' ] '+power+
+            '</li>');
+
     }
 
-
-    function list_devices(num) {
-        len=localStorage.length
-
-        if (show_data_list == 1) {
-
-            for(var i=num; i<len; i++) {
-                var key = localStorage.key(i);
-                var value = localStorage[key];
-                var value = $.parseJSON(localStorage[key]);
-
-                $(".data ul").append('<li id="'+value['id']+'" ' +
-                    'class="device_info">Device ' +
-                    'Id: '+value['mac']+'<br/>' +
-                    'Power: '+value['power']+'<br/>' +
-                    'Angel: ' +value['angle']+'<br/><br/>' +
-                    '<button>nmap</button>' +
-                    '<button>disassociate</button>'+
-                    '<button>upsidedownternet</button><br/>' +
-                    '</li>');
-                var x_y =  x_y_from_angel(value['angle'], value['power']);
-                // show visualization
-                indicator(x_y, value['power'], value['id'], value['angle']);
-            }
-
-        }
-    }
-
+    // find out the x and y coordinates relative to top and left
     function x_y_from_angel(angle, power) {
         var x = parseInt((46 * (power/10)) * Math.cos(angle / 60));
         var y = parseInt((46 *  (power/10)) * Math.sin(angle / 60)*-1);
         return { 'x':x, 'y':y }
     }
 
-    function indicator(x_y, power, _id, angle){
+    // display a circle size and position depending on power and angle
+    function indicator(power, local_id, angle){
+        var x_y =  x_y_from_angel(angle, power);
         var x = x_y.x
         var y = x_y.y
         if (power > 79) {
@@ -144,8 +133,8 @@ $(function() {
         $('<div></div>').css({
             position: "absolute",
             opacity: "0.9",
-            top: "540px",
-            left: "540px",
+            top: "500px",
+            left: "500px",
             zIndex: "100",
             cursor: "pointer",
             boxShadow: "0px 0px 10px #22ff00",
@@ -156,15 +145,52 @@ $(function() {
             borderRadius: size/2+"px",
             marginLeft: x,
             marginTop: y
-        }).attr({"id": _id, "class": 'device'}).html(angle+':'+power).appendTo('.container');
+        }).attr({"id": 'visual_'+local_id, "class": 'device', 'name': local_id}).html(angle+':'+power).appendTo('.container');
+
         device_info();
     }
 
+    // show data about device if click on circle
     function device_info() {
         $('.device').click(function(e){
+            $('.device').css({outlineStyle: "dashed", border:"none"});
             $(this).css({outlineStyle: "dashed", border:"3px solid black"});
-            $('.device_info').hide()
-            $('#'+this.id).show()
+            $('.device_info').hide();
+            var id = e.target.id;
+            var name = $('#'+id).attr('name')
+            $('#detail_'+name).show();
+        });
+        ath0();
+    }
+
+    call_data_on_off();
+
+    // turn of and the ajax call
+    function call_data_on_off() {
+        $('.call_off').hide();
+        $('.call_on').click(function(e){
+            $('.call_on').hide();
+            $('.call_off').show();
+            call_database = 1;
+        });
+        $('.call_off').click(function(e){
+            $('.call_off').hide();
+            $('.call_on').show();
+            call_database = 0;
+        });
+
+    }
+
+    //
+    function ath0() {
+        $('.ath0').click(function(e){
+            var id = e.target.id;
+            var name = $('#'+id).attr('name')
+            $.ajax({
+                url:"ath0/"+name
+            }).done(function ( data ) {
+                   console.log(data)
+            });
         });
     }
 
@@ -172,7 +198,6 @@ $(function() {
     function server_console() {
         $(".command").keydown(function(e){
             if(e.keyCode == 13) {
-
                 var command = $('.command').val()
             e.preventDefault();
             $.ajax({
@@ -191,15 +216,17 @@ $(function() {
 
 
     var degree = 0, // starting position
-        $element = $('#meter'),
         timer,
         speed = 10, // update rate in milli sec. higher is slower
         length = 10;
 
+    // rotation indicator TODO: crome fix
     function rotate() {
-        $('#meter').show();
-        $element.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});
+        $element = $('#meter'),
+        $element.show();
+        $element.css({ 'WebkitTransform': 'rotate(' + degree + 'deg)'});
         $element.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
+
         timer = setTimeout(function() {
             degree = degree + length;
             if (degree > 350) {
@@ -212,7 +239,29 @@ $(function() {
     }
 
 
+    function list_devices(num) {
+        len=localStorage.length
+        if (show_data_list == 1) {
 
+            for(var i=num; i<len; i++) {
+                var key = localStorage.key(i);
+                var value = $.parseJSON(localStorage[key]);
 
+                $(".data ul").append('<li id="detail_'+value['id']+'" ' +
+                    'class="device_info">Device ' +
+                    'Id: '+value['mac']+'<br/>' +
+                    'Power: '+value['power']+'<br/>' +
+                    'Angel: ' +value['angle']+'<br/><br/>' +
+                    '<button>nmap</button>' +
+                    '<button>disassociate</button>'+
+                    '<button>upsidedownternet</button><br/>' +
+                    '</li>');
+                var x_y =  x_y_from_angel(value['angle'], value['power']);
+                // show visualization
+                indicator(x_y, value['power'], value['id'], value['angle']);
+            }
+
+        }
+    }
 
 });
