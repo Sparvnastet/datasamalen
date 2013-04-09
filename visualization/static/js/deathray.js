@@ -6,6 +6,7 @@ $(function() {
         call_database = 1;
 
     updateContent();
+    var snd = new Audio("static/sound/sweep-background-02.wav"); // buffers automatically when created
 
     function updateContent() {
         // make json request to api /json
@@ -44,7 +45,7 @@ $(function() {
             if ( call_database == 1 ) {
             setTimeout (function () {
                 updateContent();
-            }, 10000);
+            }, 5000);
             }
         });
     }
@@ -226,6 +227,7 @@ $(function() {
         $element.show();
         $element.css({ 'WebkitTransform': 'rotate(' + degree + 'deg)'});
         $element.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
+        snd.play();
 
         timer = setTimeout(function() {
             degree = degree + length;
