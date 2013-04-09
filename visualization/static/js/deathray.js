@@ -153,7 +153,7 @@ $(function() {
     // show data about device if click on circle
     function device_info() {
         $('.device').click(function(e){
-            $('.device').css({outlineStyle: "dashed", border:"none"});
+            $('.device').css({outlineStyle: "none", border:"none"});
             $(this).css({outlineStyle: "dashed", border:"3px solid black"});
             $('.device_info').hide();
             var id = e.target.id;
