@@ -11,3 +11,9 @@ class Device(db.Document):
 
     def __unicode__(self):
         return self.mac
+
+class Clients(db.Document):
+    mac = db.StringField(max_length=17, required=True)
+
+    def __unicode__(self):
+        return self.mac

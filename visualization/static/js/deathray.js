@@ -8,7 +8,20 @@ $(function() {
     updateContent();
     var snd = new Audio("static/sound/sweep-background-02.wav"); // buffers automatically when created
 
-    function updateContent() {
+
+        $.ajax({
+            dataType: 'jsonp',
+            //jsonp: '',
+            url: 'http://localhost:28017/deathray/clients/',
+            type: 'GET',
+            crossDomain: true,
+            //contentType: "text/plain",
+            success: function (data) {
+                console.log(data)
+            }
+        });
+
+        function updateContent() {
         // make json request to api /json
         $.ajax({
             url:"json",

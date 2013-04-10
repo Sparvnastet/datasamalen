@@ -1,12 +1,15 @@
 from flask import render_template, Blueprint, jsonify, request
 from visualization import app
-from visualization.models import Device
+from visualization.models import Device, Clients
 from visualization.mock_data import *
 from fabric.api import local
 from datetime import datetime
+from datasamalen.datasamalen import get_clients_db
+
+
+
 import sys
 import fileinput
-
 devices = Blueprint('devices', __name__, template_folder='templates')
 
 @app.route('/')
@@ -17,6 +20,7 @@ def hello():
 def api_root():
     if request.method == 'GET':
         devices = Device.objects.all().order_by('-_id')[:20]
+
         devices_data = {}
         for d in devices:
             id = str(d.id)
@@ -29,6 +33,16 @@ def api_root():
 
         return resp
 
+
+@app.route('/deathray/clients/', methods = ['GET'])
+def clients():
+    if request.method == 'GET':
+        clients = get_clients_db()
+        clients = clients.find()
+        for c in clients:
+            print c['mac']
+
+        return "ko"
 
 @app.route('/muck', methods = ['GET'])
 def muck():
@@ -147,7 +161,7 @@ def run_dump():
     return "test ok"
 
 def create_device():
-    device = Device(
+    device = Clients(
         mac=generate_id(),
         power=str(generate_num(100)),
         angle=str(generate_num(360)),

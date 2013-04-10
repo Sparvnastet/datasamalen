@@ -39,7 +39,7 @@ def init_serial(tty = '/dev/ttyUSB0'):
 
     return s
 
-def init_db(host = 'localhost', port = 27017):
+def init_db(host = '127.0.0.1', port = 27017):
     mongo_client = MongoClient(host, port)
     return mongo_client.deathray
     
@@ -140,6 +140,13 @@ def update_db(db, sample):
         client['probes'] = list(set(client['probes']) | set(sample['probes']))
         clients.save(client)
 
+def get_clients_db():
+    """ Get the clients : TODO I guess the is a better way den creating db here """
+    db = init_db()
+    # Get the clients collection
+    clients = db.clients
+    return clients
+
 
 def run_capture(db, sport, infile = None):
     if not infile:
@@ -219,6 +226,7 @@ def center_of_gravity(w, a = None):
     """
     Comute weighted center of gravity
     w : weights, i.e. the power
+
     a : angle data associated with the power data points
     """
 
