@@ -13,19 +13,55 @@ $(function() {
         $.ajax({
             url: 'deathray/clients/',
             type: 'GET',
-            crossDomain: true,
-            //contentType: "text/plain",
             success: function (data) {
-
+                // list the data in the sidebar
                 $.each(data, function(id, client) {
-
                     var local_id = client.mac.toString().replace(/\:/g, '');
                     seen_list_device(local_id, client.mac, client.probes);
+                });
+                // get angle and power data for each client
+                $.each(data, function(id, client) {
+
+                    $.ajax({
+                        url: 'deathray/client/'+client.mac,
+                        type: 'GET',
+                        success: function (one_client) {
+                            paint(one_client);
+                        }
+
+                    });
 
                 });
 
             }
+
         });
+
+
+
+    function paint(one_client) {
+        one_client = one_client.client;
+        var angle = one_client.angle,
+            mac = one_client.mac,
+            power = (one_client.power * -1),
+
+        // create a local id for local storage
+            local_id = mac.toString().replace(/\:/g, '');
+
+        // if angel not defined, give angle a random number form 0 - 360
+        if (!angle) {
+            var angle = Math.floor((Math.random()*360)+1);
+        }
+
+        // on start up clear local storage
+        if(first == 1) {
+            localStorage.clear();
+            first = 0;
+        }
+        // store or update the device to local storage
+        store_device(local_id, angle, mac, power);
+    }
+
 
         function updateContent() {
         // make json request to api /json
@@ -112,18 +148,18 @@ $(function() {
 
     }
 
-    function seen_list_device(local_id, mac, probs) {
-        var allprobs = '[ '
-
-        $.each(probs,
+    function seen_list_device(local_id, mac, probes) {
+        // building a string from probes
+        var allprobes = '[ '
+        $.each(probes,
             function(key, value)  {
-                allprobs = allprobs + ' ' + value + ' ' ;
+                allprobes = allprobes + ' ' + value + ' ' ;
             });
-        allprobs = allprobs + ' ]'
+        allprobes = allprobes + ' ]'
 
         $(".data_2 ul").prepend('<li class="listing" id="list_'+local_id+'">' +
             'Mac: '+mac+' ' +
-            'Probs: '+allprobs+' ' +
+            'Probs: '+allprobes+' ' +
             '</li>');
 
     }

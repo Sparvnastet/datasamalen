@@ -147,6 +147,11 @@ def get_clients_db():
     clients = db.clients
     return clients
 
+def get_client_last_observation(mac):
+    db = init_db()
+
+    client = db.client_observations.find_one({"mac": mac})
+    return client
 
 def run_capture(db, sport, infile = None):
     if not infile:
@@ -199,6 +204,7 @@ def get_last_observation(db, mac, time_sec):
     peak_angle = center_of_gravity(powers, angles)
 
     return peak_power, peak_angle
+
 
 
 def remove_all_observations(db):

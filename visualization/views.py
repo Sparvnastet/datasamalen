@@ -4,7 +4,7 @@ from visualization.models import Device, Clients
 from visualization.mock_data import *
 from fabric.api import local
 from datetime import datetime
-from datasamalen.datasamalen import get_clients_db, remove_all_clients
+from datasamalen.datasamalen import get_clients_db, remove_all_clients, get_client_last_observation
 
 
 devices = Blueprint('devices', __name__, template_folder='templates')
@@ -42,6 +42,20 @@ def clients():
             clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
 
         resp = jsonify(clients_data)
+        resp.status_code = 200
+
+        return resp
+
+
+@app.route('/deathray/client/<client>', methods = ['GET'])
+def client_observation(client):
+    if request.method == 'GET':
+        client = get_client_last_observation(client)
+        client_data = {}
+        time = client['time'].strftime('%H:%M:%S')
+        client_data['client'] = {'mac':client['mac'], 'time':time, 'angle':client['angle'], 'power':client['power']}
+
+        resp = jsonify(client_data)
         resp.status_code = 200
 
         return resp
