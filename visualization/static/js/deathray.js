@@ -3,21 +3,27 @@ $(function() {
 
     var show_data_list = 1,
         first = 1,
-        call_database = 1;
+        call_database = 1,
+        deathray_on = 0;
 
     updateContent();
     var snd = new Audio("static/sound/sweep-background-02.wav"); // buffers automatically when created
 
 
         $.ajax({
-            dataType: 'jsonp',
-            //jsonp: '',
-            url: 'http://localhost:28017/deathray/clients/',
+            url: 'deathray/clients/',
             type: 'GET',
             crossDomain: true,
             //contentType: "text/plain",
             success: function (data) {
-                console.log(data)
+
+                $.each(data, function(id, client) {
+
+                    var local_id = client.mac.toString().replace(/\:/g, '');
+                    seen_list_device(local_id, client.mac, client.probes);
+
+                });
+
             }
         });
 
@@ -104,9 +110,20 @@ $(function() {
             '<button id="'+local_id+'" name="'+bssid+'" class="ath0">ath0</button>'+
             '</li>');
 
+    }
+
+    function seen_list_device(local_id, mac, probs) {
+        var allprobs = '[ '
+
+        $.each(probs,
+            function(key, value)  {
+                allprobs = allprobs + ' ' + value + ' ' ;
+            });
+        allprobs = allprobs + ' ]'
+
         $(".data_2 ul").prepend('<li class="listing" id="list_'+local_id+'">' +
-            '[ '+bssid+
-            ' ] '+power+
+            'Mac: '+mac+' ' +
+            'Probs: '+allprobs+' ' +
             '</li>');
 
     }

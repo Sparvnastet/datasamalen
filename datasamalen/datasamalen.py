@@ -204,6 +204,10 @@ def get_last_observation(db, mac, time_sec):
 def remove_all_observations(db):
     db.client_observations.remove({})
 
+def remove_all_clients():
+    db = init_db()
+    db.clients.remove()
+
 def pwr_filter(l):
 
     if not l or len(l) < 1:
@@ -252,4 +256,5 @@ if __name__ == '__main__':
     sport = init_serial()
     db = init_db()
     run_capture(db, sport, sys.stdin)
+
 

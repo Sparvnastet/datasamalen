@@ -4,17 +4,15 @@ from visualization.models import Device, Clients
 from visualization.mock_data import *
 from fabric.api import local
 from datetime import datetime
-from datasamalen.datasamalen import get_clients_db
+from datasamalen.datasamalen import get_clients_db, remove_all_clients
 
 
-
-import sys
-import fileinput
 devices = Blueprint('devices', __name__, template_folder='templates')
 
 @app.route('/')
 def hello():
     return render_template('index.html')
+
 
 @app.route('/json', methods = ['GET'])
 def api_root():
@@ -39,10 +37,20 @@ def clients():
     if request.method == 'GET':
         clients = get_clients_db()
         clients = clients.find()
+        clients_data = {}
         for c in clients:
-            print c['mac']
+            clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
 
-        return "ko"
+        resp = jsonify(clients_data)
+        resp.status_code = 200
+
+        return resp
+
+@app.route('/deathray/clients/remove/all', methods = ['GET'])
+def remove_clients():
+    if request.method == 'GET':
+        remove_all_clients()
+        return "all clients removed from db, fresh start"
 
 @app.route('/muck', methods = ['GET'])
 def muck():
@@ -137,10 +145,10 @@ def stop_mongodb():
 
 
 def start_scan():
-    local("sudo ifconfig wlan0 down")
-    local("sudo ifconfig wlan0 up")
-    local("sudo airmon-ng start wlan0")
-    local("sudo airodump-ng mon0")
+    local("sudo ifconfig wlan1 down")
+    local("sudo ifconfig wlan1 up")
+    local("sudo airmon-ng start wlan1")
+    local("sudo airodump-ng --berlin 1 mon0 2>&1 | ./airodump-scrubber.pl | python datasamalen.py")
     return "scanning"
 
 def start_monitor():
