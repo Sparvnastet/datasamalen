@@ -171,7 +171,7 @@ def run_capture(db, sport, infile = None):
     
     angle = None
     while True:
-        (fds_ready, _1, _2) = select(fdlist, [], [])
+        (fds_ready, _1, _2) = select.select(fdlist, [], [])
         if sport and sport in fds_ready:
             angle_reading = sport.readline() if sport else None
             angle = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
