@@ -18,6 +18,7 @@ along with Datasamalen.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
+import select
 
 import pymongo
 from datetime import datetime, timedelta
