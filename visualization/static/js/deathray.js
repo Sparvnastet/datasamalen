@@ -112,7 +112,7 @@ $(function() {
         // prepend it to the device list
         list_device(local_id, bssid, angle, power)
         // show it in the visualization
-        indicator(power, local_id, angle);
+        indicator(power, local_id, angle, bssid);
     }
 
     // list device in in device list and make a hidden li to be show on click of circle
@@ -138,10 +138,12 @@ $(function() {
             });
         allprobes = allprobes + ' ]'
 
-        $(".data_2 ul").prepend('<li class="listing" id="list_'+local_id+'">' +
-            'Mac: '+mac+' ' +
-            'Probs: '+allprobes+' ' +
+        $(".data_2 ul").append('<li class="listing" id="list_'+local_id+'">' +
+            ''+mac+' ' +
+            '<span class="probes">'+allprobes+'</span> ' +
             '</li>');
+
+        $('.data_2').scrollTop(1000000)
 
     }
 
@@ -153,7 +155,7 @@ $(function() {
     }
 
     // display a circle size and position depending on power and angle
-    function indicator(power, local_id, angle){
+    function indicator(power, local_id, angle, mac){
         var x_y =  x_y_from_angel(angle, power);
         var x = x_y.x
         var y = x_y.y
@@ -193,7 +195,7 @@ $(function() {
             borderRadius: size/2+"px",
             marginLeft: x,
             marginTop: y
-        }).attr({"id": 'visual_'+local_id, "class": 'device', 'name': local_id}).html(angle+':'+power).appendTo('.container');
+        }).attr({"id": 'visual_'+local_id, "class": 'device', 'name': local_id}).html(mac).appendTo('.container');
 
         device_info();
     }
@@ -307,7 +309,7 @@ $(function() {
                     '</li>');
                 var x_y =  x_y_from_angel(value['angle'], value['power']);
                 // show visualization
-                indicator(x_y, value['power'], value['id'], value['angle']);
+                indicator(x_y, value['power'], value['id'], value['angle'], value['mac']);
             }
 
         }

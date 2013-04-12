@@ -4,13 +4,17 @@ body {
   background-color: #03010f;
   color: orange;
   font-size: 1.1em;
+  overflow:hidden;
+  font-family: "Lucida Console", Monaco, monospace;
 }
+
 ul {
   li {
       list-style-type: none;
   }
 }
 .container {
+
   h1 {
     position: absolute;
     top: 1060px;
@@ -176,19 +180,21 @@ aside {
     @extend .all_data;
     top: 40px;
     height: 200px;
+    display: none;
   }
 
   .data_2_title {
     @extend .all_data;
-    top: 270px;
+    top: 40px;
     height: 100px;
   }
 
   .data_2 {
     @extend .all_data;
-    top: 340px;
-    height: 380px;
+    top: 60px;
+    height: 980px;
     overflow: auto;
+    font-style: Courier;
   }
 
   .data_3 {
@@ -198,6 +204,7 @@ aside {
     overflow: auto;
     margin-bottom: 20px;
     bottom:0;
+    display: none;
 
     ul  {
       padding-bottom: 20px;
@@ -210,6 +217,7 @@ aside {
     height: 60px;
     width: 700px;
     z-index: 10;
+    display: none;
   }
 
   .console {
@@ -218,6 +226,7 @@ aside {
     height: 20px;
     width: 500px;
     z-index: 11;
+    display: none;
 
     input[type="text"] {
       width: 500px;
@@ -236,5 +245,8 @@ aside {
 
    .device_info {
     display: none;
+  }
+  .probes {
+   color: green
   }
 }

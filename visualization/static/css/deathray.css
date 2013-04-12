@@ -2,7 +2,9 @@
 body {
   background-color: #03010f;
   color: orange;
-  font-size: 1.1em; }
+  font-size: 1.1em;
+  overflow: hidden;
+  font-family: "Lucida Console", Monaco, monospace; }
 
 ul li {
   list-style-type: none; }
@@ -140,32 +142,37 @@ aside .all_data, aside .data, aside .data_2_title, aside .data_2, aside .data_3,
   border-radius: 10px; }
 aside .data {
   top: 40px;
-  height: 200px; }
+  height: 200px;
+  display: none; }
 aside .data_2_title {
-  top: 270px;
+  top: 40px;
   height: 100px; }
 aside .data_2 {
-  top: 340px;
-  height: 380px;
-  overflow: auto; }
+  top: 60px;
+  height: 980px;
+  overflow: auto;
+  font-style: Courier; }
 aside .data_3 {
   top: 750px;
   height: 230px;
   overflow: auto;
   margin-bottom: 20px;
-  bottom: 0; }
+  bottom: 0;
+  display: none; }
   aside .data_3 ul {
     padding-bottom: 20px; }
 aside .console_back {
   top: 980px;
   height: 60px;
   width: 700px;
-  z-index: 10; }
+  z-index: 10;
+  display: none; }
 aside .console {
   top: 980px;
   height: 20px;
   width: 500px;
-  z-index: 11; }
+  z-index: 11;
+  display: none; }
   aside .console input[type="text"] {
     width: 500px;
     height: 28px;
@@ -176,3 +183,5 @@ aside h4 {
   margin-left: 12px; }
 aside .device_info {
   display: none; }
+aside .probes {
+  color: green; }

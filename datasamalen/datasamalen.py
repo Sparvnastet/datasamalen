@@ -147,9 +147,7 @@ def get_clients_db():
     clients = db.clients
     return clients
 
-def get_client_last_observation(mac):
-    db = init_db()
-
+def get_client_last_observation(mac, db):
     client = db.client_observations.find_one({"mac": mac})
     return client
 
