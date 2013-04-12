@@ -120,7 +120,7 @@ def update_db(db, sample):
                 'mac': sample['mac'],
                 'time': datetime.utcnow(),
                 'power': sample['power'],
-                'angle': sample['angle'],
+                'angle': sample.get('angle'),
                 })
 
 
