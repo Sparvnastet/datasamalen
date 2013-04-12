@@ -19,6 +19,9 @@ int step_pin      = 13;
 int inhibit_pin   = 11;
 int direction_pin = 12;
 
+int button1_pin   = 3;
+int button2_pin   = 2;
+
 int sensor_pin = 10;
 
 int direction = 1;
@@ -26,7 +29,7 @@ int sensor_val = 0;
 
 int step_cnt = 0;
 int step_min_on_time = 5;
-int step_speed = 30;
+int step_speed = 10;
 int step_cnt_max = 200;
 
 void setup()
@@ -34,39 +37,52 @@ void setup()
   pinMode(step_pin, OUTPUT);     
   pinMode(inhibit_pin, OUTPUT);     
   pinMode(direction_pin, OUTPUT);
-  pinMode(sensor_pin, INPUT);
+  pinMode(button1_pin, INPUT);
+  digitalWrite(button1_pin, HIGH);
+  pinMode(button2_pin, INPUT);
+  digitalWrite(button2_pin, HIGH);
 
   digitalWrite(inhibit_pin, HIGH);
   digitalWrite(direction_pin, direction);
   
   Serial.begin(9600);
+  delay(2000);
 }
 
 void loop()
 {
-  process_sensor();
   prepare_step();
   step();  
 }
 
-void process_sensor() 
+void prepare_step()
 {
-  int new_sensor_val = digitalRead(sensor_pin);
-  if (new_sensor_val != sensor_val) 
-  {
-    sensor_val = new_sensor_val;
+  
+  // Recalibrate if button 1 is pressed
+  if (digitalRead(button1_pin) == LOW) {
     step_cnt = 0;
   }
-}
+  
+  // Turn early if button 2 is pressed
+  if (digitalRead(button2_pin) == LOW) {
+    if (step_cnt > 0) {
+      direction = 1;
+    } else {
+      direction = 0; 
+    }
+  }  
+  
 
-void prepare_step() 
-{
   // Reverse direction at ends
-  if (step_cnt >= step_cnt_max || step_cnt <= -step_cnt_max)
-  {
-    direction = 1 - direction;
-    digitalWrite(direction_pin, direction);
+  if (step_cnt >= step_cnt_max) {
+    direction = 1;   
   }
+  
+  if (step_cnt <= -step_cnt_max) {
+    direction = 0;  
+  }
+  
+  digitalWrite(direction_pin, direction);
 
   // Keep track of position
   if (direction > 0)
@@ -80,17 +96,10 @@ void prepare_step()
 
 void step() 
 {
-  // Inhibit off
-  digitalWrite(inhibit_pin, LOW);
-
   // Create a negative flank to trigger step
   digitalWrite(step_pin, LOW);
+  delay(1);
   digitalWrite(step_pin, HIGH);
   
-  // Hold the voltage over the windings for a while
-  delay(step_min_on_time);
-
-  // Inhibit on - to reduce power consumption  
-  digitalWrite(inhibit_pin, HIGH);
   delay(step_speed);
 }
