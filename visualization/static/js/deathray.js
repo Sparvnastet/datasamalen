@@ -6,19 +6,22 @@ $(function() {
         call_database = 1,
         deathray_on = 0;
 
-    updateContent();
+    client_data();
     var snd = new Audio("static/sound/sweep-background-02.wav"); // buffers automatically when created
 
 
+    function client_data() {
         $.ajax({
             url: 'deathray/clients/',
             type: 'GET',
             success: function (data) {
+                rotate();
                 // list the data in the sidebar
                 $.each(data, function(id, client) {
                     var local_id = client.mac.toString().replace(/\:/g, '');
                     seen_list_device(local_id, client.mac, client.probes);
                 });
+
                 // get angle and power data for each client
                 $.each(data, function(id, client) {
 
@@ -37,6 +40,12 @@ $(function() {
 
         });
 
+        if ( call_database == 1 ) {
+            setTimeout (function () {
+                client_data();
+            }, 5000);
+        }
+    }
 
 
     function paint(one_client) {
@@ -46,7 +55,7 @@ $(function() {
             power = (one_client.power * -1),
 
         // create a local id for local storage
-            local_id = mac.toString().replace(/\:/g, '');
+        local_id = mac.toString().replace(/\:/g, '');
 
         // if angel not defined, give angle a random number form 0 - 360
         if (!angle) {
@@ -63,46 +72,16 @@ $(function() {
     }
 
 
-        function updateContent() {
+    function updateContent() {
         // make json request to api /json
-        $.ajax({
-            url:"json",
-            beforeSend: function ( xhr ) {
-            }
-            }).done(function ( data ) {
-                rotate();
-                $.each(data, function(id, device) {
-
-                    var _id = device.id,
-                    angle = device.angle,
-                    mac = device.mac,
-                    power = device.power,
-
-                    // create a local id for local storage
-                    local_id = mac.toString().replace(/\:/g, '');
-
-                    // if angel not defined, give angle a random number form 0 - 360
-                    if (!angle) {
-                        var angle = Math.floor((Math.random()*360)+1);
-                    }
-
-                    // on start up clear local storage
-                    if(first == 1) {
-                        localStorage.clear();
-                        first = 0;
-                    }
-                    // store or update the device to local storage
-                    store_device(local_id, angle, mac, power);
-
-                });
 
             // call this function after 10 sec if database call is on.
             if ( call_database == 1 ) {
             setTimeout (function () {
                 updateContent();
             }, 5000);
-            }
-        });
+        }
+
     }
 
 
@@ -138,6 +117,7 @@ $(function() {
 
     // list device in in device list and make a hidden li to be show on click of circle
     function list_device(local_id,  bssid, angle, power) {
+
         $(".data ul").append('<li id="detail_'+local_id+'" ' +
             'class="device_info">' +
             'Bssid: '+bssid+'<br/>' +
@@ -150,6 +130,7 @@ $(function() {
 
     function seen_list_device(local_id, mac, probes) {
         // building a string from probes
+        mac = mac.substring(0,2) +'::'+ mac.substring(15,17) ;
         var allprobes = '[ '
         $.each(probes,
             function(key, value)  {

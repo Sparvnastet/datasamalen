@@ -3,7 +3,7 @@ from visualization import app
 from visualization.models import Device, Clients
 from visualization.mock_data import *
 from fabric.api import local
-from datetime import datetime
+from datetime import datetime, timedelta
 from datasamalen.datasamalen import get_clients_db, remove_all_clients, get_client_last_observation
 
 
@@ -38,8 +38,16 @@ def clients():
         clients = get_clients_db()
         clients = clients.find()
         clients_data = {}
+
         for c in clients:
-            clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
+
+            client = get_client_last_observation(c['mac'])
+            if client:
+                now = datetime.utcnow()
+                diff = now - client['time']
+                if diff < timedelta(minutes=30):
+
+                    clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
 
         resp = jsonify(clients_data)
         resp.status_code = 200
@@ -47,10 +55,10 @@ def clients():
         return resp
 
 
-@app.route('/deathray/client/<client>', methods = ['GET'])
-def client_observation(client):
+@app.route('/deathray/client/<mac>', methods = ['GET'])
+def client_observation(mac):
     if request.method == 'GET':
-        client = get_client_last_observation(client)
+        client = get_client_last_observation(mac)
         client_data = {}
         time = client['time'].strftime('%H:%M:%S')
         client_data['client'] = {'mac':client['mac'], 'time':time, 'angle':client['angle'], 'power':client['power']}
