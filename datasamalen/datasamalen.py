@@ -183,7 +183,8 @@ def run_capture(db, sport, infile = None):
             if not line:
                 break           # on EOF from airodump
             sample = parse_airodump(line)
-            sample['angle'] = angle
+            if angle:
+                sample['angle'] = angle
             update_db(db, sample)
 
 
