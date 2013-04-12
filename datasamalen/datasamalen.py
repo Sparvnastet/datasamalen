@@ -120,7 +120,8 @@ def update_db(db, sample):
                 'mac': sample['mac'],
                 'time': datetime.utcnow(),
                 'power': sample['power'],
-                'angle': sample.get('angle', 0),
+                # 'angle': sample.get('angle', 0),
+                'angle': sample.get('angle', None),
                 })
 
 
@@ -182,6 +183,7 @@ def run_capture(db, sport, infile = None):
             line = infile.readline()
             if not line:
                 break           # on EOF from airodump
+            sys.stdout.write(line) # write line to stdout
             sample = parse_airodump(line)
             if angle:
                 sample['angle'] = angle
