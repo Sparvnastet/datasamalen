@@ -167,15 +167,25 @@ def run_capture(db, sport, infile = None):
     
     #     last_line = infile.readline()
 
+    if infile and sport:
+        fdlist = [infile, sport]
+    elif infile and not sport:
+        sys.stderr.write("AAAHH no serial port no angles NOES")
+        fdlist = [infile]
+    elif not infile:
+        sys.stderr.write("Error Error. I have no infile. I don't know how to deal with this.")
+        sys.exit(4)
+            
     
     angle = None
     while True:
-        (fds_ready, _1, _2) = select([infile, sport], [], [])
+        (fds_ready, _1, _2) = select(fdlist, [], [])
         if sport in fds_ready:
             angle_reading = sport.readline() if sport else None
             angle = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
         if infile in fds_ready:
             if not angle:
+                sys.stderr.write("I have no angles so I refuse to do anything useful")
                 continue        # don't do anything if we have yet to receive angle data
             line = infile.readline()
             if not line:
