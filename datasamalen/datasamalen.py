@@ -175,7 +175,7 @@ def run_capture(db, sport, infile = None):
             angle = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
         if infile in fds_ready:
             if not angle:
-                continue        # don't do anything if we have et to receive angle data
+                continue        # don't do anything if we have yet to receive angle data
             line = infile.readline()
             if not line:
                 break           # on EOF from airodump
