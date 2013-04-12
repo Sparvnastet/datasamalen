@@ -28,21 +28,16 @@ import numpy
 import serial
 
 
-g_have_sport = False
-
 # Open the serial port (angle data from arduino) if available
 def init_serial(tty = '/dev/ttyUSB0'):
     """ Initialize the serial comunication object """
-    global g_have_sport
 
     try:
         s = serial.Serial(tty, 9600, timeout=1)
-        g_have_sport = True
         return s
     except:
         s = None
-        g_have_sport = False
-        sys.stderr.write('No serial interface found - running without angle info\n')
+        sys.stderr.write('WARNING: No serial interface found - running without angle info\n')
 
     return s
 
@@ -159,43 +154,30 @@ def get_client_last_observation(mac, db):
     return client
 
 def run_capture(db, sport, infile = None):
-    global g_have_sport
-    
     if not infile:
         infile = sys.stdin
 
-    # last_line = infile.readline()
-    # while last_line != '':
-    #     sample = parse_airodump(last_line)
-    #     add_angle_info(sport, sample)
-
-    #     # do some noise reduction
-
-    #     update_db(db, sample)
-    
-    #     last_line = infile.readline()
-
-    # what file descriptors to listen to
+    # find out what files to listen to
     if infile and sport:
+        sys.stdout.write("selecting on both airodump and serial port\n")
         fdlist = [infile, sport]
     elif infile and not sport:
-        if g_have_sport:
-            sys.stderr.write("I have gotten no serial port, when I ought have\n")
+        sys.stdout.write("selecting only on airodump input\n")
         fdlist = [infile]
     elif not infile:
-        sys.stderr.write("Error Error. I have no infile. I don't know how to deal with this.\n")
+        sys.stderr.write("ERROR: I have no infile. I don't know how to deal with this. Terminating.\n")
         sys.exit(4)
             
     
     angle = None
     while True:
         (fds_ready, _1, _2) = select(fdlist, [], [])
-        if sport in fds_ready:
+        if sport and sport in fds_ready:
             angle_reading = sport.readline() if sport else None
             angle = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
         if infile in fds_ready:
-            if not angle and g_have_sport:
-                sys.stdout.write("No angles\n")
+            if not angle and sport:
+                sys.stdout.write("I DO have a serial port but I have yet to receive angles from Arduino.\n")
                 continue        # don't do anything if we have yet to receive angle data, unless we have no serial port in which case we simple do without
             line = infile.readline()
             if not line:
