@@ -98,12 +98,12 @@ def parse_ap(line):
     ap['type'] = 'ap'
     return ap
     
-def add_angle_info(sport, sample):
-    """ If available, add angular data to data point """
+# def add_angle_info(sport, sample):
+#     """ If available, add angular data to data point """
 
-    angle_reading = sport.readline() if sport else None
+#     angle_reading = sport.readline() if sport else None
     
-    sample['angle'] = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
+#     sample['angle'] = into(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
 
 def update_db(db, sample):
     """ Add the sample to the db, or update the data allready there """  
@@ -155,16 +155,32 @@ def run_capture(db, sport, infile = None):
     if not infile:
         infile = sys.stdin
 
-    last_line = infile.readline()
-    while last_line != '':
-        sample = parse_airodump(last_line)
-        add_angle_info(sport, sample)
+    # last_line = infile.readline()
+    # while last_line != '':
+    #     sample = parse_airodump(last_line)
+    #     add_angle_info(sport, sample)
 
-        # do some noise reduction
+    #     # do some noise reduction
 
-        update_db(db, sample)
+    #     update_db(db, sample)
     
-        last_line = infile.readline()
+    #     last_line = infile.readline()
+
+    
+    angle = None
+    while True:
+        (fds_ready, _1, _2) = select([infile, sport], [], [])
+        if sport in fds_ready:
+            angle_reading = sport.readline() if sport else None
+            angle = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
+        if infile in fds_ready:
+            if not angle:
+                continue
+            line = infile.readline()
+            sample = parse_airodump(last_line)
+            sample['angle'] = angle
+            update_db(db, sample)
+
 
 def get_last_observation(db, mac, time_sec):
     """
