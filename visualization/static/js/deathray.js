@@ -17,7 +17,10 @@ $(function() {
             success: function (data) {
                 rotate();
                 // list the data in the sidebar
+                $(".data_2 ul").html('');
+                $('.device').remove;
                 $.each(data, function(id, client) {
+
                     var local_id = client.mac.toString().replace(/\:/g, '');
                     seen_list_device(local_id, client.mac, client.probes);
                 });
@@ -30,6 +33,7 @@ $(function() {
                         type: 'GET',
                         success: function (one_client) {
                             paint(one_client);
+                            indicator(power, local_id, angle, mac);
                         }
 
                     });
@@ -52,7 +56,9 @@ $(function() {
         one_client = one_client.client;
         var angle = one_client.angle,
             mac = one_client.mac,
-            power = (one_client.power * -1),
+            power = (one_client.power * -1);
+            console.log(one_client.time);
+
 
         // create a local id for local storage
         local_id = mac.toString().replace(/\:/g, '');
@@ -116,7 +122,7 @@ $(function() {
     }
 
     // list device in in device list and make a hidden li to be show on click of circle
-    function list_device(local_id,  bssid, angle, power) {
+    function list_device(local_id, bssid, angle, power) {
 
         $(".data ul").append('<li id="detail_'+local_id+'" ' +
             'class="device_info">' +
@@ -130,6 +136,7 @@ $(function() {
 
     function seen_list_device(local_id, mac, probes) {
         // building a string from probes
+
         mac = mac.substring(0,2) +'::'+ mac.substring(15,17) ;
         var allprobes = '[ '
         $.each(probes,
@@ -149,13 +156,15 @@ $(function() {
 
     // find out the x and y coordinates relative to top and left
     function x_y_from_angel(angle, power) {
-        var x = parseInt((46 * (power/10)) * Math.cos(angle / 60));
-        var y = parseInt((46 *  (power/10)) * Math.sin(angle / 60)*-1);
+        var x = parseInt((46 * (power/10)) * Math.cos(angle / 100*3.14/2+3.14/2));
+        var y = parseInt((46 *  (power/10)) * Math.sin(angle / 100*3.14/2+3.14/2)*-1);
         return { 'x':x, 'y':y }
     }
 
     // display a circle size and position depending on power and angle
     function indicator(power, local_id, angle, mac){
+
+
         var x_y =  x_y_from_angel(angle, power);
         var x = x_y.x
         var y = x_y.y
@@ -190,6 +199,7 @@ $(function() {
             boxShadow: "0px 0px 10px #22ff00",
             width: size+"px",
             height: size+"px",
+            color: "red",
             backgroundColor: color,
             fontcolor: "#FFFFFF",
             borderRadius: size/2+"px",
@@ -207,8 +217,10 @@ $(function() {
             $(this).css({outlineStyle: "dashed", border:"3px solid black"});
             $('.device_info').hide();
             var id = e.target.id;
-            var name = $('#'+id).attr('name')
-            $('#detail_'+name).show();
+            var name = $('#'+id).attr('name');
+            var overlay = $('#detail_'+name);
+            overlay.appendTo(document.body);
+
         });
         ath0();
     }

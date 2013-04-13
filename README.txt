@@ -50,20 +50,27 @@ Install:
 
 Running airodump et al:
 
-Start airmon:
-$ airmon-ng start wlan0
+0 Disable your wifi connection
 
-Check that it's freq. hopping
-$ airodump-ng mon0
-
-Pipe data to datasamalen
-$ airodump-ng --berlin 1 mon0 2>&1 | ./airodump-scrubber.pl | python datasamalen.py
-
-Running mongodb:
-
-$ mkdir data
+1 Running mongodb
 $ killall mongod
 $ mongod --rest --dbpath data
+
+
+2 Start and Stop and wlan0
+$ sudo ifconfig wlan0 down
+$ sudo ifconfig wlan0 up
+
+4 Start airmon:
+$ sudo airmon-ng start wlan0
+
+5 Check that it's freq. hopping
+$ airodump-ng mon0
+
+6 Pipe data to datasamalen with sart.sh
+$ sudo ./sart.sh
+or
+$ ./airodump-ng --berlin 1 mon0 2>&1 | ./airodump-scrubber.pl | python datasamalen.py
 
 Access raw datasamalen data:
 http://localhost:28017/deathray/clients/

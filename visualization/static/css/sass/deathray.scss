@@ -42,7 +42,8 @@ ul {
   }
   .highest {
     @extend .indicator;
-    margin-left: 10px;
+    margin-left: 0px;
+    top: 980px;
     width: 100px;
     height: 100px;
     background-color: red;
@@ -50,7 +51,8 @@ ul {
   }
   .high {
     @extend .indicator;
-    margin-left: 120px;
+    margin-left: 110px;
+    top: 1010px;
     width: 70px;
     height:70px;
     background-color: #ff6e00;
@@ -58,7 +60,8 @@ ul {
   }
   .medium {
     @extend .indicator;
-    margin-left: 200px;
+    margin-left: 190px;
+    top: 1040px;
     width: 40px;
     height: 40px;
     background-color: #f6e016;
@@ -66,7 +69,8 @@ ul {
   }
   .low {
     @extend .indicator;
-    margin-left: 260px;
+    margin-left: 240px;
+    top: 1048px;
     width: 32px;
     height: 32px;
     background-color: #0051ff;
@@ -74,7 +78,8 @@ ul {
   }
   .minor {
     @extend .indicator;
-    margin-left: 300px;
+    margin-left: 282px;
+    top: 1060px;
     width: 12px;
     height: 12px;
     background-color: #22ff00;
@@ -180,18 +185,19 @@ aside {
     @extend .all_data;
     top: 40px;
     height: 200px;
-    display: none;
+
   }
 
   .data_2_title {
     @extend .all_data;
     top: 40px;
     height: 100px;
+    display: none;
   }
 
   .data_2 {
     @extend .all_data;
-    top: 60px;
+    top: 440px;
     height: 980px;
     overflow: auto;
     font-style: Courier;

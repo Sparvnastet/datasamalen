@@ -4,7 +4,7 @@ from visualization.models import Device, Clients
 from visualization.mock_data import *
 from fabric.api import local
 from datetime import datetime, timedelta
-from datasamalen.datasamalen import get_clients_db, remove_all_clients, get_client_last_observation, init_db
+from datasamalen.datasamalen import get_clients_db, remove_all_clients, get_client_last_observation, init_db, get_last_observation
 
 
 devices = Blueprint('devices', __name__, template_folder='templates')
@@ -47,8 +47,7 @@ def clients():
             if client:
                 now = datetime.utcnow()
                 diff = now - client['time']
-                if diff < timedelta(minutes=30):
-                    print client
+                if diff < timedelta(minutes=16):
                     clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
 
         resp = jsonify(clients_data)
@@ -62,9 +61,13 @@ def client_observation(mac):
     if request.method == 'GET':
         db = init_db()
         client = get_client_last_observation(mac, db)
+        power, angle = get_last_observation(db, mac, 20)
+        print power
+        print angle
+
         client_data = {}
         time = client['time'].strftime('%H:%M:%S')
-        client_data['client'] = {'mac':client['mac'], 'time':time, 'angle':client['angle'], 'power':client['power']}
+        client_data['client'] = {'mac':client['mac'], 'time':time, 'angle': angle, 'power':power}
 
         resp = jsonify(client_data)
         resp.status_code = 200
@@ -102,7 +105,6 @@ def disassociate(device):
 @app.route('/console/<command>', methods = ['GET'])
 def command(command):
     t = datetime.now().strftime('[%H:%M:%S]')
-    print t
     if command == '--help':
         return '%s Commands: 1:[restart wlan] 2:[start mon] [stop mon] 3:[start dump] [stop dump]' %  str(t)
     elif command == 'getwlan':

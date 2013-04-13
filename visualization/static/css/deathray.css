@@ -32,31 +32,36 @@ ul li {
     z-index: 100;
     box-shadow: 0px 0px 10px #22ff00; }
   #deathray .highest {
-    margin-left: 10px;
+    margin-left: 0px;
+    top: 980px;
     width: 100px;
     height: 100px;
     background-color: red;
     border-radius: 50px; }
   #deathray .high {
-    margin-left: 120px;
+    margin-left: 110px;
+    top: 1010px;
     width: 70px;
     height: 70px;
     background-color: #ff6e00;
     border-radius: 35px; }
   #deathray .medium {
-    margin-left: 200px;
+    margin-left: 190px;
+    top: 1040px;
     width: 40px;
     height: 40px;
     background-color: #f6e016;
     border-radius: 20px; }
   #deathray .low {
-    margin-left: 260px;
+    margin-left: 240px;
+    top: 1048px;
     width: 32px;
     height: 32px;
     background-color: #0051ff;
     border-radius: 16px; }
   #deathray .minor {
-    margin-left: 300px;
+    margin-left: 282px;
+    top: 1060px;
     width: 12px;
     height: 12px;
     background-color: #22ff00;
@@ -142,13 +147,13 @@ aside .all_data, aside .data, aside .data_2_title, aside .data_2, aside .data_3,
   border-radius: 10px; }
 aside .data {
   top: 40px;
-  height: 200px;
-  display: none; }
+  height: 200px; }
 aside .data_2_title {
   top: 40px;
-  height: 100px; }
+  height: 100px;
+  display: none; }
 aside .data_2 {
-  top: 60px;
+  top: 440px;
   height: 980px;
   overflow: auto;
   font-style: Courier; }
