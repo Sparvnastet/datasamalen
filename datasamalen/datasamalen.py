@@ -177,10 +177,11 @@ def run_capture(db, sport, infile = None):
             angle_reading = sport.readline() if sport else None
             angle = int(angle_reading[:-2]) if angle_reading and re.match('^-?[0-9]+\r\n', angle_reading) else None
         if infile in fds_ready:
-            if not angle and sport:
+            if angle == None and sport:
                 sys.stdout.write("I DO have a serial port but I have yet to receive angles from Arduino.\n")
                 continue        # don't do anything if we have yet to receive angle data, unless we have no serial port in which case we simple do without
-            line = infile.readline()
+            line = infile.readline().decode('latin1')
+
             if not line:
                 break           # on EOF from airodump
             sample = parse_airodump(line)
