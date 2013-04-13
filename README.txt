@@ -61,16 +61,20 @@ $ mongod --rest --dbpath data
 $ sudo ifconfig wlan0 down
 $ sudo ifconfig wlan0 up
 
-4 Start airmon:
+3 Start airmon:
 $ sudo airmon-ng start wlan0
 
-5 Check that it's freq. hopping
+2-3 can also be done by runnig
+$ sudo ./wlan0.sh
+
+(5) Check that it's freq. hopping
 $ airodump-ng mon0
 
 6 Pipe data to datasamalen with sart.sh
 $ sudo ./sart.sh
 or
 $ ./airodump-ng --berlin 1 mon0 2>&1 | ./airodump-scrubber.pl | python datasamalen.py
+keep the console in a separate terminal window
 
 Access raw datasamalen data:
 http://localhost:28017/deathray/clients/

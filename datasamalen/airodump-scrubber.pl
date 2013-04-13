@@ -10,6 +10,10 @@ while (<>) {
     if (/^ [A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}  [A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}/) {
 	s/\s+$//;
 	syswrite(\*STDOUT, "C $time_string$_\n");
+    } elsif (/^ \(not associated\)   [A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}/) {
+	s/not associated/not-associated/;
+	s/\s+$//;
+	syswrite(\*STDOUT, "C $time_string$_\n");
     } elsif (/^ [A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}/) {
 	s/\s+$//;
 	syswrite(\*STDOUT, "A $time_string$_\n");

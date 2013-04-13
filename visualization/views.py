@@ -47,7 +47,7 @@ def clients():
             if client:
                 now = datetime.utcnow()
                 diff = now - client['time']
-                if diff < timedelta(minutes=16):
+                if diff < timedelta(minutes=36):
                     clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
 
         resp = jsonify(clients_data)
