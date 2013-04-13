@@ -154,8 +154,8 @@ def get_clients_db():
     return clients
 
 def get_client_last_observation(mac, db):
-    client = db.client_observations.find({"mac": mac}).sort([("timestamp", pymongo.ASCENDING)])
-    return client
+    client = db.client_observations.find({"mac": mac}).sort([("timestamp", pymongo.DESCENDING)])
+    return client or client[0]
 
 def run_capture(db, sport, infile = None):
     if not infile:
@@ -188,8 +188,7 @@ def run_capture(db, sport, infile = None):
             if not line:
                 break           # on EOF from airodump
             sample = parse_airodump(line)
-            if angle == None:
-                sample['angle'] = angle
+            sample['angle'] = angle
             update_db(db, sample)
 
 
