@@ -113,7 +113,10 @@ def update_db(db, sample):
 
     if sample['type'] != 'client':
         return
-    
+
+    if sample.get('angle', None) == None:
+        sys.stderr.write("Warning: Inserting null angle\n")
+
     # Register the observation (if it includes power info)
     if sample['power']:
         client_observations = db.client_observations
@@ -151,7 +154,7 @@ def get_clients_db():
     return clients
 
 def get_client_last_observation(mac, db):
-    client = db.client_observations.find_one({"mac": mac})
+    client = db.client_observations.find({"mac": mac}).sort([("timestamp", pymongo.ASCENDING)])
     return client
 
 def run_capture(db, sport, infile = None):
