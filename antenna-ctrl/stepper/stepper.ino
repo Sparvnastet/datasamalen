@@ -30,7 +30,7 @@ int sensor_val = 0;
 int step_cnt = 0;
 int step_min_on_time = 5;
 int step_speed = 10;
-int step_cnt_max = 200;
+int step_cnt_max = 400;
 
 void setup()
 {                
