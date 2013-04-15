@@ -154,8 +154,12 @@ def get_clients_db():
     return clients
 
 def get_client_last_observation(mac, db):
+    #return db.client_observations.find_one({"mac": mac})
     client = db.client_observations.find({"mac": mac}).sort([("timestamp", pymongo.DESCENDING)])
-    return client or client[0]
+    #client = db.client_observations.find({"mac": mac}).sort([("timestamp", pymongo.ASCENDING)])
+#print client
+    #print client.count()
+    return None if client.count() == 0 else client[0]
 
 def run_capture(db, sport, infile = None):
     if not infile:
@@ -184,6 +188,9 @@ def run_capture(db, sport, infile = None):
                 sys.stdout.write("I DO have a serial port but I have yet to receive angles from Arduino.\n")
                 continue        # don't do anything if we have yet to receive angle data, unless we have no serial port in which case we simple do without
             line = infile.readline().decode('latin1')
+
+            if angle == None:
+                sys.stderr.write("WARNING BAD")
 
             if not line:
                 break           # on EOF from airodump
@@ -227,12 +234,22 @@ def get_last_observation(db, mac, time_sec):
     # Find the angle with the most power
     peak_angle = center_of_gravity(powers, angles)
 
+    if not peak_angle:
+        peak_angle = angles[0]
+
     return peak_power, peak_angle
 
 
 
-def remove_all_observations(db):
-    db.client_observations.remove({})
+#def remove_all_observations(db):
+#    db.client_observations.remove({})
+def remove_all_observations():
+    db = init_db()
+    db.clients_observations.remove()
+
+def remove_all():
+    remove_all_observations()
+    remove_all_clients()
 
 def remove_all_clients():
     db = init_db()

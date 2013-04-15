@@ -5,7 +5,7 @@ from visualization.mock_data import *
 from fabric.api import local
 from datetime import datetime, timedelta
 from datasamalen.datasamalen import get_clients_db, remove_all_clients, get_client_last_observation, init_db, get_last_observation
-
+import sys
 
 devices = Blueprint('devices', __name__, template_folder='templates')
 
@@ -47,7 +47,8 @@ def clients():
             if client:
                 now = datetime.utcnow()
                 diff = now - client['time']
-                if diff < timedelta(minutes=10):
+                #if diff < timedelta(minutes=15):
+                if True:
                     clients_data[c['mac']] = {'mac':c['mac'], 'probes':c['probes']}
 
         resp = jsonify(clients_data)
@@ -61,13 +62,18 @@ def client_observation(mac):
     if request.method == 'GET':
         db = init_db()
         client = get_client_last_observation(mac, db)
+        #if not client:
+        #    sys.stderr.write("A client was not true wut\n")
+        #    return
         power, angle = get_last_observation(db, mac, 20)
-        print power
-        print angle
+        if angle == None:
+            sys.stderr.write("Webserver no find angle\n")
+
 
         client_data = {}
-        time = client['time'].strftime('%H:%M:%S')
-        client_data['client'] = {'mac':client['mac'], 'time':time, 'angle': angle, 'power':power}
+        if client:
+            time = client['time'].strftime('%H:%M:%S')
+            client_data['client'] = {'mac':client['mac'], 'time':time, 'angle': angle, 'power':power}
 
         resp = jsonify(client_data)
         resp.status_code = 200

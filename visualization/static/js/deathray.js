@@ -33,7 +33,7 @@ $(function() {
                         type: 'GET',
                         success: function (one_client) {
                             paint(one_client);
-                            indicator(power, local_id, angle, mac);
+                            // indicator(power, local_id, angle, mac);
                         }
 
                     });
@@ -47,7 +47,7 @@ $(function() {
         if ( call_database == 1 ) {
             setTimeout (function () {
                 client_data();
-            }, 5000);
+            }, 15000);
         }
     }
 
@@ -65,8 +65,16 @@ $(function() {
 
         // if angel not defined, give angle a random number form 0 - 360
         if (!angle) {
+            console.log('null angel found');
+            return;
             var angle = Math.floor((Math.random()*360)+1);
         }
+
+        if (!power) {
+            var power = Math.floor((Math.random()*100)+1);
+        }
+
+        console.log(angle);
 
         // on start up clear local storage
         if(first == 1) {
@@ -126,9 +134,9 @@ $(function() {
 
         $(".data ul").append('<li id="detail_'+local_id+'" ' +
             'class="device_info">' +
-            'Bssid: '+bssid+'<br/>' +
+            'Mac: '+bssid+'<br/>' +
             'Power: '+power+' | ' +
-            'Angel: ' +angle+'<br/><br/>' +
+            'Angle: ' +angle+'<br/><br/>' +
             '<button id="'+local_id+'" name="'+bssid+'" class="ath0">ath0</button>'+
             '</li>');
 
@@ -137,33 +145,50 @@ $(function() {
     function seen_list_device(local_id, mac, probes) {
         // building a string from probes
 
+        if (probes.length < 1) {
+
+        } else {
         mac = mac.substring(0,2) +'::'+ mac.substring(15,17) ;
-        var allprobes = '[ '
+        var allprobes = '[ ';
+        var foundnetname = false;
         $.each(probes,
             function(key, value)  {
-                allprobes = allprobes + ' ' + value + ' ' ;
+                if (value != "homerun" && value != "homerun1x" && value != "Konsthallen") {
+                    allprobes = allprobes + ' ' + value + ' ' ;
+                    foundnetname = true;
+                }
             });
         allprobes = allprobes + ' ]'
 
-        $(".data_2 ul").append('<li class="listing" id="list_'+local_id+'">' +
-            ''+mac+' ' +
-            '<span class="probes">'+allprobes+'</span> ' +
-            '</li>');
+        if (foundnetname) {
+            var row = $('<li class="listing" id="list_'+local_id+'">' +
+                ''+mac+' ' +
+                '<span class="probes"></span> ' +
+                '<br/><br/></li>');
+            row.find(".probes").text(allprobes);
+            $(".data_2 ul").append(
+                row
+            );
 
-        $('.data_2').scrollTop(1000000)
-
+            $('.data_2').scrollTop(1000000)
+        }
+        }
     }
 
     // find out the x and y coordinates relative to top and left
     function x_y_from_angel(angle, power) {
-        var x = parseInt((46 * (power/10)) * Math.cos(angle / 100*3.14/2+3.14/2));
-        var y = parseInt((46 *  (power/10)) * Math.sin(angle / 100*3.14/2+3.14/2)*-1);
+        var ang = ((-1)*angle)*1.35 -90;
+
+        var x = parseInt((46 * (power/10)) * Math.cos((ang/ 180) * 3.14))*(1);
+        var y = parseInt((46 *  (power/10)) * Math.sin((ang / 180) * 3.14));
+
+        //var x = parseInt((46 * (power/10)) * Math.cos(angle /  100*3.14/2+3.14/2));
+        //var y = parseInt((46 *  (power/10)) * Math.sin(angle / 100*3.14/2+3.14/2)*-1);
         return { 'x':x, 'y':y }
     }
 
     // display a circle size and position depending on power and angle
     function indicator(power, local_id, angle, mac){
-
 
         var x_y =  x_y_from_angel(angle, power);
         var x = x_y.x
@@ -199,7 +224,7 @@ $(function() {
             boxShadow: "0px 0px 10px #22ff00",
             width: size+"px",
             height: size+"px",
-            color: "red",
+            color: "white",
             backgroundColor: color,
             fontcolor: "#FFFFFF",
             borderRadius: size/2+"px",
@@ -217,9 +242,10 @@ $(function() {
             $(this).css({outlineStyle: "dashed", border:"3px solid black"});
             $('.device_info').hide();
             var id = e.target.id;
-            var name = $('#'+id).attr('name');
-            var overlay = $('#detail_'+name);
-            overlay.appendTo(document.body);
+            var name = $('#'+id).attr('name')
+            overlay = $('#detail_'+name).show();
+            $(".device_corner").html('');
+            overlay.appendTo($('.device_corner'));
 
         });
         ath0();

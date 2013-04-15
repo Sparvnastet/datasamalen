@@ -140,23 +140,25 @@ ul li {
 aside .all_data, aside .data, aside .data_2_title, aside .data_2, aside .data_3, aside .console_back, aside .console {
   position: absolute;
   left: 1100px;
-  width: 700px;
+  width: 900px;
   margin: 0 0 20px 0;
   color: yellow;
   background-color: black;
   border-radius: 10px; }
 aside .data {
   top: 40px;
-  height: 200px; }
+  height: 200px;
+  display: none; }
 aside .data_2_title {
   top: 40px;
   height: 100px;
   display: none; }
 aside .data_2 {
-  top: 440px;
+  top: 40px;
   height: 980px;
   overflow: auto;
-  font-style: Courier; }
+  font-style: Courier;
+  padding: 20px 20px; }
 aside .data_3 {
   top: 750px;
   height: 230px;
@@ -190,3 +192,8 @@ aside .device_info {
   display: none; }
 aside .probes {
   color: green; }
+
+.device_corner {
+  position: absolute;
+  left: 20px;
+  top: 30px; }

@@ -97,7 +97,6 @@ ul {
 }
 
 
-
 #outor {
   @extend .circle;
   top: 46px;
@@ -174,7 +173,7 @@ aside {
   .all_data {
     position: absolute;
     left: 1100px;
-    width: 700px;
+    width: 900px;
     margin: 0 0 20px 0;
     color: yellow;
     background-color: black;
@@ -185,7 +184,7 @@ aside {
     @extend .all_data;
     top: 40px;
     height: 200px;
-
+    display: none;
   }
 
   .data_2_title {
@@ -197,15 +196,17 @@ aside {
 
   .data_2 {
     @extend .all_data;
-    top: 440px;
+    top: 40px;
     height: 980px;
     overflow: auto;
     font-style: Courier;
+    padding: 20px 20px;
   }
 
   .data_3 {
     @extend .all_data;
     top: 750px;
+
     height: 230px;
     overflow: auto;
     margin-bottom: 20px;
@@ -255,4 +256,11 @@ aside {
   .probes {
    color: green
   }
+}
+
+.device_corner {
+  position: absolute;
+  left: 20px;
+  top: 30px;
+
 }
